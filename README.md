@@ -24,21 +24,12 @@ cd to target/ directory
 
 Run jar file java -jar {jar-file-name}
 
-### Reference Documentation
-For further reference, please consider the following sections:
+Link to access swagger api documentation
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.7.12/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.7.12/maven-plugin/reference/html/#build-image)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/2.7.12/reference/htmlsingle/#web)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/docs/2.7.12/reference/htmlsingle/#data.sql.jpa-and-spring-data)
+Kindly use swagger for api reference http://localhost:8080/swagger-ui/index.html
 
-### Guides
-The following guides illustrate how to use some features concretely:
+Test credentials
 
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
+username patrick@gmail.com password 1234 role member
 
+username nesh@gmail.com password 1234 role admin
