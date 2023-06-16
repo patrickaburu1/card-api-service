@@ -26,8 +26,6 @@ import java.util.*;
 @Service
 @Log4j2
 public class CardService {
-
-
     private final CardRepository cardRepository;
     private final UserServiceImpl userService;
     private final AppFunctions appFunctions;
@@ -54,21 +52,16 @@ public class CardService {
 
 
     public ResponseEntity<?> updateCard(CardDtoUpdate cardDtoUpdate) {
-
         User user = userService.getUser(SecurityUtils.getCurrentUserLogin());
         Optional<Card> cardOptional = cardRepository.findByIdAndCardStatus(cardDtoUpdate.getId(), RecordStatus.ACTIVE.toString());
         if (cardOptional.isEmpty())
             throw new CustomExceptionNotFound("Invalid card");
-        //return ResponseEntity.ok().body(new ResponseModel("error", "Invalid card"));
         Card card = cardOptional.get();
-        card.setCreatedByUserId(user.getId());
         card.setName(cardDtoUpdate.getName());
         if (Arrays.stream(CardStatus.values()).noneMatch(status -> status.toString().equals(cardDtoUpdate.getStatus().toUpperCase())))
             return ResponseEntity.ok().body(new ResponseModel("error", "Status not supported"));
-
         if (user.getRoles().stream().noneMatch(node -> node.getName().equalsIgnoreCase("ROLE_SUPER_ADMIN")) && !card.getCreatedByUserId().equals(user.getId()))
             throw new UnAuthorizedExceptionNotFound("User not authorized");
-
         card.setStatus(cardDtoUpdate.getStatus().toUpperCase());
         if (null != cardDtoUpdate.getColor() && !appFunctions.isValidColor(cardDtoUpdate.getColor()))
             return ResponseEntity.badRequest().body(new ResponseModel("error", "Color validation failed"));
@@ -81,22 +74,16 @@ public class CardService {
     }
 
     public ResponseEntity<?> deleteCard(CardDtoDelete cardDtoDelete) {
-
         User user = userService.getUser(SecurityUtils.getCurrentUserLogin());
         Optional<Card> cardOptional = cardRepository.findByIdAndCardStatus(cardDtoDelete.getId(), RecordStatus.ACTIVE.toString());
-
         if (cardOptional.isEmpty())
             throw new CustomExceptionNotFound("Invalid card");
         Card card = cardOptional.get();
         card.setCardStatus(RecordStatus.DELETED.toString());
-
         if (user.getRoles().stream().noneMatch(node -> node.getName().equalsIgnoreCase("ROLE_SUPER_ADMIN")) && !card.getCreatedByUserId().equals(user.getId()))
             throw new UnAuthorizedExceptionNotFound("User not authorized");
-
         cardRepository.save(card);
         return ResponseEntity.ok(new ResponseModel("success", "Card deleted successfully"));
-
-
     }
 
     public ResponseEntity<?> getCard(Long cardId) {
@@ -106,11 +93,10 @@ public class CardService {
             throw new CustomExceptionNotFound("Invalid card");
         Card card = cardOptional.get();
 
-        if (user.getRoles().stream().noneMatch(node -> node.getName().equalsIgnoreCase("ROLE_SUPER_ADMIN")) && !card.getCreatedByUserId().equals(user.getId()))
+        if (user.getRoles().stream().noneMatch(node -> node.getName().equalsIgnoreCase("ROLE_ADMIN")) && !card.getCreatedByUserId().equals(user.getId()))
             throw new UnAuthorizedExceptionNotFound("User not authorized");
         Map<String, Object> map = new HashMap<>();
         map.put("cards", card);
-
         return ResponseEntity.ok().body(new ResponseModel("success", "success", map));
     }
 
@@ -118,7 +104,6 @@ public class CardService {
         User user = userService.getUser(SecurityUtils.getCurrentUserLogin());
         Page<Card> card;
         Pageable pageable;
-
         //add pageable and sortable and validate inputs
         if (appFunctions.isSortValid(sortField, sortOrder)) {
             Sort.Direction direction = appFunctions.getSortDirection(sortOrder);
@@ -127,16 +112,10 @@ public class CardService {
         } else {
             pageable = PageRequest.of(pageNo, pageSize);
         }
-
         Boolean shouldSearch = appFunctions.shouldSearch(searchKey);
-
-        Date date=new Date();
-
-        if (user.getRoles().stream().anyMatch(node -> node.getName().equalsIgnoreCase("ROLE_ADMIN")) && shouldSearch)
-
+        if (user.getRoles().stream().anyMatch(node -> node.getName().equalsIgnoreCase("ROLE_ADMIN")) && !shouldSearch)
             card = cardRepository.findAllByCardStatus(RecordStatus.ACTIVE.toString(), pageable);
-
-        else if (user.getRoles().stream().anyMatch(node -> node.getName().equalsIgnoreCase("ROLE_ADMIN")) && !shouldSearch)
+        else if (user.getRoles().stream().anyMatch(node -> node.getName().equalsIgnoreCase("ROLE_ADMIN")) && shouldSearch)
             card = cardRepository.getAlCardStatusAndNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrColorContainingIgnoreCaseOrStatusContainsIgnoreCaseOrCreatedAt(RecordStatus.ACTIVE.toString(), searchKey, searchKey, searchKey,searchKey,searchKey, pageable);
         else if (!shouldSearch)
             card = cardRepository.findCardByCreatedByUserIdAndCardStatus(user.getId(), RecordStatus.ACTIVE.toString(), pageable);
